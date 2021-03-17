@@ -1,4 +1,5 @@
 import numpy as np
+import datetime as dt
 
 import sqlalchemy
 from sqlalchemy.ext.automap import automap_base
@@ -39,7 +40,7 @@ def index():
         f"/api/v1.0/precipitation<br/>"
         f"/api/v1.0/stations<br/>"
         f"/api/v1.0/tobs<br/>"
-        f"/api/v1.0/<start_date>"
+        f"/api/v1.0/year_data"
     )
 
 @app.route("/api/v1.0/precipitation")
@@ -98,18 +99,27 @@ def temperature():
 
     return jsonify(all_temperature)
 
-@app.route("/api/v1.0/<start>")
+@app.route("/api/v1.0/year_data")
 def statistics():
 
     session = Session(engine)
 
-    recent_date = session.query(Measurement.date).order_by(Measurement.date.desc()).first()
+    year_data = session.query(Measurement.date, Measurement.prcp).\
+        filter(Measurement.date >= '2016-08-23').\
+        order_by(Measurement.date.asc()).all()
 
+    min_value = session.query(func.min(Measurement.prcp)).all()
+       
+    max_value = session.query(func.max(Measurement.prcp)).all()
+    
+    avg_value = session.query(func.avg(Measurement.prcp)).all()
 
+    session.close()
 
-
-
-
+    all_statistics = list(np.ravel(year_data, min_value, max_value, avg_value))
+      
+    return jsonify(all_statistics)
+                        
 
 if __name__ == '__main__':
     app.run(debug=True)
