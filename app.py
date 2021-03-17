@@ -32,6 +32,8 @@ app = Flask(__name__)
 # Flask Routes
 ###################################
 
+# Route 1 - Home Route
+
 @app.route("/")
 def index():
     """List all available api routes."""
@@ -42,6 +44,8 @@ def index():
         f"/api/v1.0/tobs<br/>"
         f"/api/v1.0/year_data"
     )
+
+# Route 2 - Precipitation Route
 
 @app.route("/api/v1.0/precipitation")
 def precipitation():
@@ -63,6 +67,8 @@ def precipitation():
 
     return jsonify(all_precipitation)
 
+# Route 3 - Stations Route
+
 @app.route("/api/v1.0/stations")
 def stations():
 
@@ -75,6 +81,8 @@ def stations():
     all_stations = list(np.ravel(results))
 
     return jsonify(all_stations)
+
+# Route 4 - Date and Temperature of Most Active Station Route    
 
 @app.route("/api/v1.0/tobs")
 def temperature():
@@ -99,24 +107,19 @@ def temperature():
 
     return jsonify(all_temperature)
 
+# Route 5 - Min, Max, and Average Temperatures from '2016-08-23' and Greater Route
+
 @app.route("/api/v1.0/year_data")
 def statistics():
 
     session = Session(engine)
 
-    year_data = session.query(Measurement.date, Measurement.prcp).\
-        filter(Measurement.date >= '2016-08-23').\
-        order_by(Measurement.date.asc()).all()
-
-    min_value = session.query(func.min(Measurement.prcp)).all()
-       
-    max_value = session.query(func.max(Measurement.prcp)).all()
-    
-    avg_value = session.query(func.avg(Measurement.prcp)).all()
+    year_data = session.query(Measurement.date, (func.min(Measurement.tobs)), (func.max(Measurement.tobs)), (func.avg(Measurement.tobs))).\
+        filter(Measurement.date >= '2016-08-23').all()
 
     session.close()
 
-    all_statistics = list(np.ravel(year_data, min_value, max_value, avg_value))
+    all_statistics = list(np.ravel(year_data))
       
     return jsonify(all_statistics)
                         
