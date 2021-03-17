@@ -38,7 +38,8 @@ def index():
         f"Available routes:<br/>"
         f"/api/v1.0/precipitation<br/>"
         f"/api/v1.0/stations<br/>"
-        f"/api/v1.0/tobs"
+        f"/api/v1.0/tobs<br/>"
+        f"/api/v1.0/<start_date>"
     )
 
 @app.route("/api/v1.0/precipitation")
@@ -96,6 +97,14 @@ def temperature():
         all_temperature.append(tobs_dict)
 
     return jsonify(all_temperature)
+
+@app.route("/api/v1.0/<start>")
+def statistics():
+
+    session = Session(engine)
+
+    recent_date = session.query(Measurement.date).order_by(Measurement.date.desc()).first()
+
 
 
 
