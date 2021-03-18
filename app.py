@@ -42,7 +42,8 @@ def index():
         f"/api/v1.0/precipitation<br/>"
         f"/api/v1.0/stations<br/>"
         f"/api/v1.0/tobs<br/>"
-        f"/api/v1.0/year_data"
+        f"/api/v1.0/start<br/>"
+        f"/api/v1.0/start/end"
     )
 
 # Route 2 - Precipitation Route
@@ -109,13 +110,13 @@ def temperature():
 
 # Route 5 - Min, Max, and Average Temperatures from '2016-08-23' and Greater Route
 
-@app.route("/api/v1.0/year_data")
-def statistics():
+@app.route("/api/v1.0/<start>")
+def statistics(start=None):
 
     session = Session(engine)
 
-    year_data = session.query(Measurement.date, (func.min(Measurement.tobs)), (func.max(Measurement.tobs)), (func.avg(Measurement.tobs))).\
-        filter(Measurement.date >= '2016-08-23').all()
+    year_data = session.query((func.min(Measurement.tobs)), (func.max(Measurement.tobs)), (func.avg(Measurement.tobs))).\
+        filter(Measurement.date >= start).all()
 
     session.close()
 
@@ -123,6 +124,24 @@ def statistics():
       
     return jsonify(all_statistics)
                         
+
+# Route 6 - Min, Max, and Average Temperatures using a start and an end date.
+
+@app.route("/api/v1.0/<start>/<end>")
+def statistics2(start=None, end=None):
+
+    session = Session(engine)
+
+    year_data = session.query((func.min(Measurement.tobs)), (func.max(Measurement.tobs)), (func.avg(Measurement.tobs))).\
+        filter(Measurement.date >= start).\
+        filter(Measurement.date <= end).all()
+
+    session.close()
+
+    all_statistics = list(np.ravel(year_data))
+      
+    return jsonify(all_statistics)
+
 
 if __name__ == '__main__':
     app.run(debug=True)
